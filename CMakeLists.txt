@@ -33,4 +33,4 @@ target_link_libraries(_core PUBLIC matplot)
 target_compile_definitions(_core PRIVATE VERSION_INFO=${PROJECT_VERSION})
 
 # The install directory is the output (wheel) directory
-install(TARGETS _core DESTINATION projekt_test)
+install(TARGETS _core DESTINATION tp3_filipaleksander)
