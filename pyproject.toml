@@ -1,0 +1,22 @@
+[build-system]
+requires = ["scikit-build-core>=0.10", "pybind11"]
+build-backend = "scikit_build_core.build"
+
+
+[project]
+name = "tp3_filipaleksander"
+version = "1"
+description="Projekt 3 techniki programowania 2025"
+readme = "README.md"
+authors = [
+  { name = "Filip Skudlarz", email = "s203314@student.pg.edu.pl" },
+  { name = "Aleksander Kargol", email = "s203225@student.pg.edu.pl"}
+]
+
+[project.optional-dependencies]
+test = ["pytest"]
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q"
+testpaths = ["tests"]
