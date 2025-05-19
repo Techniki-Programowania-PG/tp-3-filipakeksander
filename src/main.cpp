@@ -1,25 +1,26 @@
 #include <pybind11/pybind11.h>
 #include <pybind11/stl.h>
+#include <pybind11/complex.h>
 #include <matplot/matplot.h>
 #include <vector>
 #include <cmath>
-
-std::vector<std::vector<double> > generuj_sin(double czestotliwosc,int ilosc_punktow, double x_min, double x_maks, double przesun_faz){
+#include <complex>
+#include <iostream>
+const double pi = 3.141592653589;
+std::vector<std::vector<double> > generuj_sin(const double czestotliwosc,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
     std::vector<std::vector<double> >sygnal;
     sygnal.resize(2);
     double step = (x_maks - x_min) / (ilosc_punktow - 1);
     for(int i=0;i<ilosc_punktow;i++){
         sygnal[0].push_back(x_min + i * step);
-        sygnal[1].push_back(sin(czestotliwosc * sygnal[0][i]+przesun_faz));
+        sygnal[1].push_back(sin(2 * pi * czestotliwosc * sygnal[0][i] + przesun_faz));
     }
     return sygnal;
 }
-
-std::vector<std::vector<double> > generuj_cos(double czestotliwosc,int ilosc_punktow, double x_min, double x_maks, double przesun_faz){
-    return generuj_sin(czestotliwosc, ilosc_punktow, x_min, x_maks, przesun_faz + 1.57);
+std::vector<std::vector<double> > generuj_cos(const double czestotliwosc,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
+    return generuj_sin(czestotliwosc, ilosc_punktow, x_min, x_maks, przesun_faz + pi/2);
 }
-
-std::vector<std::vector<double> > generuj_prostokatny(double czestotliwosc, int wypelnienie, int ilosc_punktow, double x_min, double x_maks){
+std::vector<std::vector<double> > generuj_prostokatny(const double czestotliwosc, const int ilosc_punktow, const int wypelnienie, const double x_min, const double x_maks){
     std::vector<std::vector<double> >sygnal;
     sygnal.resize(2);
     double step = (x_maks - x_min) / (ilosc_punktow - 1);
@@ -42,7 +43,7 @@ std::vector<std::vector<double> > generuj_prostokatny(double czestotliwosc, int 
     return sygnal;
 }
 
-std::vector<std::vector<double> > generuj_piloksztaltny(double czestotliwosc, int ilosc_punktow, double x_min, double x_maks){
+std::vector<std::vector<double> > generuj_piloksztaltny(const double czestotliwosc, const int ilosc_punktow, const double x_min, const double x_maks){
     std::vector<std::vector<double> >sygnal;
     sygnal.resize(2);
     double step = (x_maks - x_min) / (ilosc_punktow - 1);
@@ -53,26 +54,105 @@ std::vector<std::vector<double> > generuj_piloksztaltny(double czestotliwosc, in
         sygnal[0].push_back(x_min + i * step);
         sygnal[1].push_back(wartosc);
         wartosc += 2/ilosc_w_okresie;
-        if(wartosc>1){
-            wartosc=-1;
+        if(wartosc > 1){
+            wartosc = -1;
         }
     }
     return sygnal;
 }
-
-void wyswietl(std::vector<double> x,std::vector<double> y){
+std::vector<double> wartosc_bezwzgledna(const std::vector<std::complex<double> > x){
+    std::vector<double> wynik;
+    for(int i=0;i<x.size();i++){
+        wynik.push_back(sqrt(x[i].imag() * x[i].imag() + x[i].real() * x[i].real()));
+    }
+    return wynik;
+}
+std::vector<std::complex<double> > dft(const std::vector<double> x){
+    std::vector<std::complex<double> > transformata;
+    for(int k=0;k<x.size();k++){
+        std::complex<double> suma(0,0);
+        for(int n=0;n<x.size();n++){
+            double kat = -2 * pi * k * n / x.size();
+            std::complex<double> wynik(cos(kat),sin(kat));
+            suma += x[n] * wynik;
+        }
+        transformata.push_back(suma);
+    }
+    return transformata;
+}
+std::vector<double> idtf(const std::vector<std::complex<double> > transformata){
+    std::vector<double> x;
+    for(int n=0;n<transformata.size();n++){
+        std::complex<double> suma(0,0);
+        for(int k=0;k<transformata.size();k++){
+            double kat = 2 * pi * k * n / transformata.size();
+            std::complex<double> wynik(cos(kat),sin(kat));
+            suma += transformata[k] * wynik;
+        }
+        x.push_back(suma.real()/transformata.size());
+    }
+    return x;
+}
+void wyswietl_2D(const std::vector<double> x, const std::vector<double> y, const std::string nazwa, const std::string y_label, const std::string x_label){
     using namespace matplot;
-    plot(x, y)->color({0.f, 0.7f, 0.9f});
-    xlim({x[0],x.back()});
-    //ylim({-2, +2});
+    plot(x,y)->line_width(3).color("red");
+    double ymaks = y[0], ymin = y[0],xmin = x[0], xmaks = x[0];
+    for(int i=0;i<y.size();i++){
+        if(y[i]>ymaks) ymaks = y[i];
+        if(y[i]<ymin) ymin = y[i];
+        if(x[i]>xmaks) xmaks = x[i];
+        if(x[i]<xmin) xmin = x[i];
+    }
+    ylim({ymin - 1, ymaks + 1});
+    xlim({xmin,xmaks});
+    title(nazwa);
+    xlabel(x_label);
+    ylabel(y_label);
+    grid(on);
     show();
+}
+void wyswietl_1D(const std::vector<double> y, const std::string nazwa, const std::string y_label){
+    std::vector<double> x(y.size());
+    for(int i=0;i<x.size();i++) x[i] = i;
+    wyswietl_2D(x,y,nazwa,y_label,"");
+}
+void wyswietl_dft(const std::vector<std::complex<double> > transformata, const double czestotliwosc_probkowania, const bool czy_tylko_dodatnie, const std::string nazwa, const std::string y_label){
+    double d = transformata.size() / czestotliwosc_probkowania;
+    std::vector<double> x,y;
+    int srodek;
+    if(transformata.size() % 2 == 0) srodek = transformata.size()/2 - 1;
+    else srodek = (transformata.size() - 1)/2;
+    for(int i=0;i<=srodek;i++){
+        x.push_back(i/d);
+        y.push_back(transformata[i].imag()*transformata[i].imag() + transformata[i].real()*transformata[i].real());
+    }
+    if(!czy_tylko_dodatnie){
+        if(transformata.size() % 2 == 0) srodek++;
+        int a = srodek;
+        srodek *= -1;
+        while(srodek <= -1){
+            x.push_back(srodek/d);
+            y.push_back(transformata[a].imag()*transformata[a].imag() + transformata[a].real()*transformata[a].real());
+            srodek++;
+            a++;
+        }
+    }
+    wyswietl_2D(x,y,nazwa,y_label,"Czestotliwosc [Hz]");
 }
 namespace py = pybind11;
 
 PYBIND11_MODULE(_core, k) {
     k.def("generuj_sin",&generuj_sin);
     k.def("generuj_cos",&generuj_cos);
-    k.def("wyswietl",&wyswietl);
     k.def("generuj_prostokatny", &generuj_prostokatny);
     k.def("generuj_piloksztaltny", &generuj_piloksztaltny);
+
+    k.def("wyswietl_2D",&wyswietl_2D);
+    k.def("wyswietl_1D",&wyswietl_1D);
+    k.def("wyswietl_dft",&wyswietl_dft);
+
+    k.def("dft",&dft);
+    k.def("idft",&idtf);
+    k.def("wartosc_bezwzgledna",&wartosc_bezwzgledna);
+    
 }
