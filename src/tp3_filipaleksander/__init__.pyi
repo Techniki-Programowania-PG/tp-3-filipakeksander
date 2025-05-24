@@ -1,7 +1,7 @@
 """
 Biblioteka generująca, przekształcająca i wyświetlająca sygnały
 """
-def generuj_sin(czestotliwosc: float,ilosc_punktow: int, x_min: float,x_maks: float,przesuniecie: float) -> list:
+def generuj_sin(czestotliwosc: float,amplituda: float,ilosc_punktow: int, x_min: float,x_maks: float,przesuniecie: float) -> list:
     """
     Generuje sygnał sinusowy o podanej częstotliwości i przesunięciu w fazie
 
@@ -11,7 +11,7 @@ def generuj_sin(czestotliwosc: float,ilosc_punktow: int, x_min: float,x_maks: fl
 
     wyjście[i] - oś y (wartości)
     """
-def generuj_cos(czestotliwosc: float,ilosc_punktow: int,x_min: float,x_maks: float,przesuniecie: float) -> list:
+def generuj_cos(czestotliwosc: float,amplituda: float,ilosc_punktow: int,x_min: float,x_maks: float,przesuniecie: float) -> list:
     """
     Generuje sygnał cosinusowy o podanej częstotliwości i przesunięciu w fazie
 
@@ -21,7 +21,7 @@ def generuj_cos(czestotliwosc: float,ilosc_punktow: int,x_min: float,x_maks: flo
 
     wyjście[i] - oś y (wartości)
     """
-def generuj_prostokatny(czestotliwosc: float,ilosc_punktow: int, wypelnienie: int,x_min: float,x_maks: float) -> list:
+def generuj_prostokatny(czestotliwosc: float,amplituda: float,ilosc_punktow: int, wypelnienie: int,x_min: float,x_maks: float) -> list:
     """
     Generuje sygnał prostokątny o podanej częstotliwości i wypełnieniu
 
@@ -33,7 +33,7 @@ def generuj_prostokatny(czestotliwosc: float,ilosc_punktow: int, wypelnienie: in
 
     wyjście[i] - oś y (wartości)
     """
-def generuj_piloksztaltny(czestotliwosc: float,ilosc_punktow: int,x_min: float,x_maks: float) -> list:
+def generuj_piloksztaltny(czestotliwosc: float,amplituda: float,ilosc_punktow: int,x_min: float,x_maks: float) -> list:
     """
     Generuje sygnał piłokształtny o podanej częstotliwości
 
@@ -71,4 +71,12 @@ def wyswietl_dft(transformata: list,czestotliwosc_probkowania: float,czy_tylko_d
     Częstotliwość próbkowania jest równa: ilość_punktów / (x_maks - x_min)
 
     Czy_tylko_dotanie ustala czy wyświetla ujemne częstotliwości
+    """
+def zaszum(sygnal: list,moc_zaszumiania: float) -> list:
+    """
+    Zaszumia sygnał
+
+    Moc_zaszumiania odpowiada za to jak bardzo jest zaszumiony sygnał
+
+    maksymalne zaszumnie dla punktu równa się (sygnal_max - sygnal_min) * (moc_zaszumiania / 100)
     """

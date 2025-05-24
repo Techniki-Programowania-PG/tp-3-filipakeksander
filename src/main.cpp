@@ -3,24 +3,25 @@
 #include <pybind11/complex.h>
 #include <matplot/matplot.h>
 #include <vector>
+#include <cstdlib>
 #include <cmath>
 #include <complex>
-#include <iostream>
+#include <ctime>
 const double pi = 3.141592653589;
-std::vector<std::vector<double> > generuj_sin(const double czestotliwosc,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
+std::vector<std::vector<double> > generuj_sin(const double czestotliwosc,const double amplituda,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
     std::vector<std::vector<double> >sygnal;
     sygnal.resize(2);
     double step = (x_maks - x_min) / (ilosc_punktow - 1);
     for(int i=0;i<ilosc_punktow;i++){
         sygnal[0].push_back(x_min + i * step);
-        sygnal[1].push_back(sin(2 * pi * czestotliwosc * sygnal[0][i] + przesun_faz));
+        sygnal[1].push_back(amplituda * sin(2 * pi * czestotliwosc * sygnal[0][i] + przesun_faz));
     }
     return sygnal;
 }
-std::vector<std::vector<double> > generuj_cos(const double czestotliwosc,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
-    return generuj_sin(czestotliwosc, ilosc_punktow, x_min, x_maks, przesun_faz + pi/2);
+std::vector<std::vector<double> > generuj_cos(const double czestotliwosc,const double amplituda,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
+    return generuj_sin(czestotliwosc, amplituda, ilosc_punktow, x_min, x_maks, przesun_faz + pi/2);
 }
-std::vector<std::vector<double> > generuj_prostokatny(const double czestotliwosc, const int ilosc_punktow, const int wypelnienie, const double x_min, const double x_maks){
+std::vector<std::vector<double> > generuj_prostokatny(const double czestotliwosc, const double amplituda, const int ilosc_punktow, const int wypelnienie, const double x_min, const double x_maks){
     std::vector<std::vector<double> >sygnal;
     sygnal.resize(2);
     double step = (x_maks - x_min) / (ilosc_punktow - 1);
@@ -34,16 +35,16 @@ std::vector<std::vector<double> > generuj_prostokatny(const double czestotliwosc
             gor_zak+=okres;
         }
         if(sygnal[0][i] <= gor_zak){
-            sygnal[1].push_back(-1);
+            sygnal[1].push_back(-amplituda);
         }
         else{
-            sygnal[1].push_back(1);
+            sygnal[1].push_back(amplituda);
         }
     }
     return sygnal;
 }
 
-std::vector<std::vector<double> > generuj_piloksztaltny(const double czestotliwosc, const int ilosc_punktow, const double x_min, const double x_maks){
+std::vector<std::vector<double> > generuj_piloksztaltny(const double czestotliwosc, const double amplituda, const int ilosc_punktow, const double x_min, const double x_maks){
     std::vector<std::vector<double> >sygnal;
     sygnal.resize(2);
     double step = (x_maks - x_min) / (ilosc_punktow - 1);
@@ -52,7 +53,7 @@ std::vector<std::vector<double> > generuj_piloksztaltny(const double czestotliwo
     double wartosc = -1;
     for(int i=0;i<ilosc_punktow;i++){
         sygnal[0].push_back(x_min + i * step);
-        sygnal[1].push_back(wartosc);
+        sygnal[1].push_back(amplituda * wartosc);
         wartosc += 2/ilosc_w_okresie;
         if(wartosc > 1){
             wartosc = -1;
@@ -124,7 +125,7 @@ void wyswietl_dft(const std::vector<std::complex<double> > transformata, const d
     else srodek = (transformata.size() - 1)/2;
     for(int i=0;i<=srodek;i++){
         x.push_back(i/d);
-        y.push_back(transformata[i].imag()*transformata[i].imag() + transformata[i].real()*transformata[i].real());
+        y.push_back(2 * ( sqrt(transformata[i].imag()*transformata[i].imag() + transformata[i].real()*transformata[i].real()) / transformata.size() ) );
     }
     if(!czy_tylko_dodatnie){
         if(transformata.size() % 2 == 0) srodek++;
@@ -132,12 +133,28 @@ void wyswietl_dft(const std::vector<std::complex<double> > transformata, const d
         srodek *= -1;
         while(srodek <= -1){
             x.push_back(srodek/d);
-            y.push_back(transformata[a].imag()*transformata[a].imag() + transformata[a].real()*transformata[a].real());
+             y.push_back(2 * ( sqrt(transformata[a].imag()*transformata[a].imag() + transformata[a].real()*transformata[a].real()) / transformata.size() ) );
             srodek++;
             a++;
         }
     }
     wyswietl_2D(x,y,nazwa,y_label,"Czestotliwosc [Hz]");
+}
+std::vector<double> zaszum(const std::vector<double> sygnal,const double moc_zaszumiania){
+    std::vector<double> wynik;
+    double max = sygnal[0],min = sygnal[0];
+    for(int i=1;i<sygnal.size();i++){
+        if(sygnal[i] > max) max = sygnal[i];
+        if(sygnal[i] < min) min = sygnal[i];
+    }
+    double max_zaszumienie = (max - min) * (moc_zaszumiania / 100);
+    std::srand(std::time(NULL));
+    for(int i=0;i<sygnal.size();i++){
+        double z = (std::rand() *1.0) / RAND_MAX * max_zaszumienie;
+        if(std::rand()%2==0) z*=-1;
+        wynik.push_back(sygnal[i] + z);
+    }
+    return wynik;
 }
 namespace py = pybind11;
 
@@ -155,4 +172,5 @@ PYBIND11_MODULE(_core, k) {
     k.def("idft",&idtf);
     k.def("wartosc_bezwzgledna",&wartosc_bezwzgledna);
     
+    k.def("zaszum",&zaszum);
 }
