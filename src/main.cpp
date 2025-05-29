@@ -7,7 +7,6 @@
 #include <cmath>
 #include <complex>
 #include <ctime>
-#include <iostream>
 const double pi = 3.141592653589;
 std::vector<std::vector<double> > generuj_sin(const double czestotliwosc,const double amplituda,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
     std::vector<std::vector<double> >sygnal;
@@ -95,8 +94,9 @@ std::vector<double> idtf(const std::vector<std::complex<double> > transformata){
     }
     return x;
 }
-void wyswietl_2D(const std::vector<double> x, const std::vector<double> y, const std::string nazwa, const std::string y_label, const std::string x_label){
+void wyswietl_2D(const std::vector<double> x, const std::vector<double> y, const std::string nazwa, const std::string y_label, const std::string x_label,const std::string nazwa_pliku){
     using namespace matplot;
+    auto fig = figure();
     plot(x,y)->line_width(3).color("red");
     double ymaks = y[0], ymin = y[0],xmin = x[0], xmaks = x[0];
     for(int i=0;i<y.size();i++){
@@ -111,14 +111,18 @@ void wyswietl_2D(const std::vector<double> x, const std::vector<double> y, const
     xlabel(x_label);
     ylabel(y_label);
     grid(on);
-    show();
+    if(nazwa_pliku == "") show();
+    else{
+        fig->size(600, 420);
+        save(nazwa_pliku);
+    }
 }
-void wyswietl_1D(const std::vector<double> y, const std::string nazwa, const std::string y_label){
+void wyswietl_1D(const std::vector<double> y, const std::string nazwa, const std::string y_label,const std::string nazwa_pliku){
     std::vector<double> x(y.size());
     for(int i=0;i<x.size();i++) x[i] = i;
-    wyswietl_2D(x,y,nazwa,y_label,"");
+    wyswietl_2D(x,y,nazwa,y_label,"",nazwa_pliku);
 }
-void wyswietl_amplitude_dft(const std::vector<std::complex<double> > transformata, const double czestotliwosc_probkowania, const bool czy_tylko_dodatnie, const std::string nazwa){
+void wyswietl_amplitude_dft(const std::vector<std::complex<double> > transformata, const double czestotliwosc_probkowania, const bool czy_tylko_dodatnie, const std::string nazwa,const std::string nazwa_pliku){
     double d = transformata.size() / czestotliwosc_probkowania;
     std::vector<double> x,y;
     std::vector<double> modul = wartosc_bezwzgledna(transformata);
@@ -143,14 +147,20 @@ void wyswietl_amplitude_dft(const std::vector<std::complex<double> > transformat
             a++;
         }
     }
-    wyswietl_2D(x,y,nazwa,"Amplituda","Czestotliwosc [Hz]");
+    wyswietl_2D(x,y,nazwa,"Amplituda","Czestotliwosc [Hz]",nazwa_pliku);
 }
-void wyswietl_img(const std::vector<std::vector<double>> img,const std::string nazwa){
+void wyswietl_img(const std::vector<std::vector<double>> img,const std::string nazwa,const std::string nazwa_pliku){
     using namespace matplot;
+    auto fig = figure();
     imagesc(img);
     colormap(palette::gray());
     title(nazwa);
-    show();
+    fig->size(600, 420);
+    if(nazwa_pliku == "") show();
+    else{
+        fig->size(600, 420);
+        save(nazwa_pliku);
+    }
 }
 std::vector<double> zaszum(const std::vector<double> sygnal,const double moc_zaszumiania){
     std::vector<double> wynik;

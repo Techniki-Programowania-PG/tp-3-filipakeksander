@@ -43,14 +43,17 @@ def generuj_piloksztaltny(czestotliwosc: float,amplituda: float,ilosc_punktow: i
 
     wyjście[i] - oś y (wartości)
     """
-def wyswietl_2D(x: list,y: list,nazwa: str,y_label: str,x_label: str) -> None:
+def wyswietl_2D(x: list,y: list,nazwa: str,y_label: str,x_label: str,nazwa_pliku: str) -> None:
     """
     Wyświetla wykres y(x)
 
+    Jeżeli nazwa_pliku == "" to biblioteka tylko wyświetla wykres, w przeciwnym wypadku zapisuje go pod podaną nazwą (gdy zapisujesz plik wyświetlanie będzie nie do końca poprawne)
     """
-def wyswietl_1D(y: list,nazwa: str,y_label: str) -> None:
+def wyswietl_1D(y: list,nazwa: str,y_label: str,nazwa_pliku: str) -> None:
     """
     Wyświetla wykres y
+
+    Jeżeli nazwa_pliku == "" to biblioteka tylko wyświetla wykres, w przeciwnym wypadku zapisuje go pod podaną nazwą (gdy zapisujesz plik wyświetlanie będzie nie do końca poprawne)
     """
 def dft(x: list) -> list:
     """
@@ -64,13 +67,15 @@ def wartosc_bezwzgledna(x: list) -> list:
     """
     Oblicza moduły licz zespolonych w tablicy
     """
-def wyswietl_amplitude_dft(transformata: list,czestotliwosc_probkowania: float,czy_tylko_dodatnie: bool,nazwa: str) -> None:
+def wyswietl_amplitude_dft(transformata: list,czestotliwosc_probkowania: float,czy_tylko_dodatnie: bool,nazwa: str,nazwa_pliku: str) -> None:
     """
     Ładnie wyświetla dyskretną transformate Fouriera
 
     Częstotliwość próbkowania jest równa: ilość_punktów / (x_maks - x_min)
 
     Czy_tylko_dotanie ustala czy wyświetla ujemne częstotliwości
+
+    Jeżeli nazwa_pliku == "" to biblioteka tylko wyświetla wykres, w przeciwnym wypadku zapisuje go pod podaną nazwą (gdy zapisujesz plik wyświetlanie będzie nie do końca poprawne)
     """
 def zaszum(sygnal: list,moc_zaszumiania: float) -> list:
     """
@@ -110,11 +115,13 @@ def filtracja2D(sygnal: list,filtr: list) -> list:
 
     Filtr Laplace'a  [[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]
     """
-def wyswietl_img(img: list,nazwa: str) -> None:
+def wyswietl_img(img: list,nazwa: str,nazwa_pliku: str) -> None:
     """
     Wyśiwtla zdjęcie w skali szarości
 
     Nazwa to tytuł wykresu
 
     Używane do pokazu filtracji 2D
+
+    Jeżeli nazwa_pliku == "" to biblioteka tylko wyświetla wykres, w przeciwnym wypadku zapisuje go pod podaną nazwą (gdy zapisujesz plik wyświetlanie będzie nie do końca poprawne)
     """
