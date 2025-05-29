@@ -117,15 +117,18 @@ void wyswietl_1D(const std::vector<double> y, const std::string nazwa, const std
     for(int i=0;i<x.size();i++) x[i] = i;
     wyswietl_2D(x,y,nazwa,y_label,"");
 }
-void wyswietl_dft(const std::vector<std::complex<double> > transformata, const double czestotliwosc_probkowania, const bool czy_tylko_dodatnie, const std::string nazwa, const std::string y_label){
+void wyswietl_amplitude_dft(const std::vector<std::complex<double> > transformata, const double czestotliwosc_probkowania, const bool czy_tylko_dodatnie, const std::string nazwa){
     double d = transformata.size() / czestotliwosc_probkowania;
     std::vector<double> x,y;
+    std::vector<double> modul = wartosc_bezwzgledna(transformata);
     int srodek;
     if(transformata.size() % 2 == 0) srodek = transformata.size()/2 - 1;
     else srodek = (transformata.size() - 1)/2;
     for(int i=0;i<=srodek;i++){
         x.push_back(i/d);
-        y.push_back(2 * ( sqrt(transformata[i].imag()*transformata[i].imag() + transformata[i].real()*transformata[i].real()) / transformata.size() ) );
+        double wartosc = modul[i] / czestotliwosc_probkowania;
+        if(czy_tylko_dodatnie) wartosc*=2;
+        y.push_back(wartosc);
     }
     if(!czy_tylko_dodatnie){
         if(transformata.size() % 2 == 0) srodek++;
@@ -133,12 +136,13 @@ void wyswietl_dft(const std::vector<std::complex<double> > transformata, const d
         srodek *= -1;
         while(srodek <= -1){
             x.push_back(srodek/d);
-             y.push_back(2 * ( sqrt(transformata[a].imag()*transformata[a].imag() + transformata[a].real()*transformata[a].real()) / transformata.size() ) );
+            double wartosc = modul[a] / czestotliwosc_probkowania;
+            y.push_back(wartosc);
             srodek++;
             a++;
         }
     }
-    wyswietl_2D(x,y,nazwa,y_label,"Czestotliwosc [Hz]");
+    wyswietl_2D(x,y,nazwa,"Amplituda","Czestotliwosc [Hz]");
 }
 std::vector<double> zaszum(const std::vector<double> sygnal,const double moc_zaszumiania){
     std::vector<double> wynik;
@@ -156,6 +160,21 @@ std::vector<double> zaszum(const std::vector<double> sygnal,const double moc_zas
     }
     return wynik;
 }
+std::vector<double> filtracja1D(std::vector<double> sygnal,std::vector<double> filtr){
+    std::vector<double> wynik;
+    for(int i=0;i<sygnal.size();i++){
+        double suma = 0;
+        for(int j=0;j<filtr.size();j++){
+            int nowe_i = i + j - (filtr.size()/2);
+            if(nowe_i >= sygnal.size()) nowe_i = sygnal.size() - 1;
+            if(nowe_i < 0) nowe_i = 0;
+            suma += sygnal[nowe_i] * filtr[j];
+        }
+        wynik.push_back(suma);
+    }
+    return wynik;
+}
+
 namespace py = pybind11;
 
 PYBIND11_MODULE(_core, k) {
@@ -166,11 +185,13 @@ PYBIND11_MODULE(_core, k) {
 
     k.def("wyswietl_2D",&wyswietl_2D);
     k.def("wyswietl_1D",&wyswietl_1D);
-    k.def("wyswietl_dft",&wyswietl_dft);
+    k.def("wyswietl_amplitude_dft",&wyswietl_amplitude_dft);
 
     k.def("dft",&dft);
     k.def("idft",&idtf);
     k.def("wartosc_bezwzgledna",&wartosc_bezwzgledna);
     
     k.def("zaszum",&zaszum);
+
+    k.def("filtracja1D",&filtracja1D);
 }

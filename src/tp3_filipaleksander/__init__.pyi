@@ -64,7 +64,7 @@ def wartosc_bezwzgledna(x: list) -> list:
     """
     Oblicza moduły licz zespolonych w tablicy
     """
-def wyswietl_dft(transformata: list,czestotliwosc_probkowania: float,czy_tylko_dodatnie: bool,nazwa: str,y_label: str) -> None:
+def wyswietl_amplitude_dft(transformata: list,czestotliwosc_probkowania: float,czy_tylko_dodatnie: bool,nazwa: str) -> None:
     """
     Ładnie wyświetla dyskretną transformate Fouriera
 
@@ -79,4 +79,18 @@ def zaszum(sygnal: list,moc_zaszumiania: float) -> list:
     Moc_zaszumiania odpowiada za to jak bardzo jest zaszumiony sygnał
 
     maksymalne zaszumnie dla punktu równa się (sygnal_max - sygnal_min) * (moc_zaszumiania / 100)
+    """
+def filtracja1D(sygnal: list,filtr: list) -> list:
+    """
+    Filtruje sygnał za pomocą podanego sygnału
+
+    Przykładowe filtry:
+
+    Średnia ruchoma [1/3,1/3,1/3]
+
+    Filtr różnicowy [-1,1] lub [-1,0,1]
+
+    Filtr Gaussa [0.25,0.5,0.25]
+
+    Filtr wykrywający piki [1,-2,1]
     """
