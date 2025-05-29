@@ -82,7 +82,7 @@ def zaszum(sygnal: list,moc_zaszumiania: float) -> list:
     """
 def filtracja1D(sygnal: list,filtr: list) -> list:
     """
-    Filtruje sygnał za pomocą podanego sygnału
+    Filtruje sygnał 1D za pomocą podanego sygnału
 
     Przykładowe filtry:
 
@@ -93,4 +93,28 @@ def filtracja1D(sygnal: list,filtr: list) -> list:
     Filtr Gaussa [0.25,0.5,0.25]
 
     Filtr wykrywający piki [1,-2,1]
+    """
+def filtracja2D(sygnal: list,filtr: list) -> list:
+    """
+    Filtruje sygnał 2D za pomocą podanego sygnału
+
+    Przykładowe filtry:
+
+    Box blur (uśredniający) [[1/9,1/9,1/9],[1/9,1/9,1/9],[1/9,1/9,1/9]]
+
+    Gaussian blur [[0.0625, 0.125, 0.0625],[0.125,  0.25,  0.125 ],[0.0625, 0.125, 0.0625]]
+
+    Filtr Sobela X [[-1,0,1],[-2,0,2],[-1,0,1]]
+
+    Filtr Sobela Y [[-1,-2,-1],[0,0,0],[1,2,1]]
+
+    Filtr Laplace'a  [[-1,-1,-1],[-1,8,-1],[-1,-1,-1]]
+    """
+def wyswietl_img(img: list,nazwa: str) -> None:
+    """
+    Wyśiwtla zdjęcie w skali szarości
+
+    Nazwa to tytuł wykresu
+
+    Używane do pokazu filtracji 2D
     """

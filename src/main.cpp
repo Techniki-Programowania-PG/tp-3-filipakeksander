@@ -7,6 +7,7 @@
 #include <cmath>
 #include <complex>
 #include <ctime>
+#include <iostream>
 const double pi = 3.141592653589;
 std::vector<std::vector<double> > generuj_sin(const double czestotliwosc,const double amplituda,const int ilosc_punktow, const double x_min, const double x_maks, const double przesun_faz){
     std::vector<std::vector<double> >sygnal;
@@ -144,6 +145,13 @@ void wyswietl_amplitude_dft(const std::vector<std::complex<double> > transformat
     }
     wyswietl_2D(x,y,nazwa,"Amplituda","Czestotliwosc [Hz]");
 }
+void wyswietl_img(const std::vector<std::vector<double>> img,const std::string nazwa){
+    using namespace matplot;
+    imagesc(img);
+    colormap(palette::gray());
+    title(nazwa);
+    show();
+}
 std::vector<double> zaszum(const std::vector<double> sygnal,const double moc_zaszumiania){
     std::vector<double> wynik;
     double max = sygnal[0],min = sygnal[0];
@@ -160,7 +168,7 @@ std::vector<double> zaszum(const std::vector<double> sygnal,const double moc_zas
     }
     return wynik;
 }
-std::vector<double> filtracja1D(std::vector<double> sygnal,std::vector<double> filtr){
+std::vector<double> filtracja1D(const std::vector<double> sygnal,const std::vector<double> filtr){
     std::vector<double> wynik;
     for(int i=0;i<sygnal.size();i++){
         double suma = 0;
@@ -174,7 +182,33 @@ std::vector<double> filtracja1D(std::vector<double> sygnal,std::vector<double> f
     }
     return wynik;
 }
-
+std::vector<std::vector<double>> filtracja2D(const std::vector<std::vector<double>> sygnal, const std::vector<std::vector<double>> filtr){
+    int wys_syg = sygnal.size();
+    int szer_syg = sygnal[0].size();
+    int filtr_wys = filtr.size();
+    int filtr_szer = filtr[0].size();
+    int filtr_srodek_x = filtr_szer / 2;
+    int filtr_srodek_y = filtr_wys / 2;
+    std::vector<std::vector<double>> wynik(wys_syg, std::vector<double>(szer_syg,0));
+    for(int i=0;i<wys_syg;i++){
+        for(int j=0;j<szer_syg;j++){
+            double suma = 0;
+            for(int m=0;m<filtr_wys;m++){
+                for(int n=0;n<filtr_szer;n++){
+                    int y = i + m - filtr_srodek_y;
+                    int x = j + n - filtr_srodek_x;
+                    if(x<0) x=0;
+                    if(y<0) y=0;
+                    if(x>=szer_syg) x = szer_syg - 1;
+                    if(y>=wys_syg) y = wys_syg - 1;
+                    suma += sygnal[y][x] * filtr[m][n];
+                }
+            }
+            wynik[i][j] = suma;
+        }
+    }
+    return wynik;
+}
 namespace py = pybind11;
 
 PYBIND11_MODULE(_core, k) {
@@ -186,6 +220,7 @@ PYBIND11_MODULE(_core, k) {
     k.def("wyswietl_2D",&wyswietl_2D);
     k.def("wyswietl_1D",&wyswietl_1D);
     k.def("wyswietl_amplitude_dft",&wyswietl_amplitude_dft);
+    k.def("wyswietl_img",&wyswietl_img);
 
     k.def("dft",&dft);
     k.def("idft",&idtf);
@@ -194,4 +229,5 @@ PYBIND11_MODULE(_core, k) {
     k.def("zaszum",&zaszum);
 
     k.def("filtracja1D",&filtracja1D);
+    k.def("filtracja2D",&filtracja2D);
 }
