@@ -113,7 +113,7 @@ void wyswietl_2D(const std::vector<double> x, const std::vector<double> y, const
     grid(on);
     if(nazwa_pliku == "") show();
     else{
-        fig->size(600, 420);
+        fig->size(900, 420);
         save(nazwa_pliku);
     }
 }
