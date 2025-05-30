@@ -155,10 +155,12 @@ void wyswietl_img(const std::vector<std::vector<double>> img,const std::string n
     imagesc(img);
     colormap(palette::gray());
     title(nazwa);
-    fig->size(600, 420);
     if(nazwa_pliku == "") show();
     else{
-        fig->size(600, 420);
+        int szer = img.size();
+        int wys = img[0].size();
+        double proporcje = szer / wys;
+        fig->size(900, (int)(proporcje * 420));
         save(nazwa_pliku);
     }
 }
